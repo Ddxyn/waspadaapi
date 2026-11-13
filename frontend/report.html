@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="description" content="Kirim foto dan titik lokasi kebakaran atau asap di Kota Jambi. AI memeriksa foto, Anda mendapat kode untuk melacak tindak lanjut petugas." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ApiWaspada" />
+  <meta property="og:title" content="Lapor Kebakaran | ApiWaspada Kota Jambi" />
+  <meta property="og:description" content="Kirim foto dan titik lokasi kebakaran atau asap di Kota Jambi. AI memeriksa foto, Anda mendapat kode untuk melacak tindak lanjut petugas." />
+  <meta property="og:image" content="/assets/images/og-apiwaspada.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>Lapor Kebakaran | ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="public" data-page="report">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1">
+    <div class="container">
+      <header class="page-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/beranda.html">Beranda</a><i data-icon="chevron-right"></i><span>Lapor Kebakaran</span></nav>
+        <h1>Lapor kebakaran</h1>
+        <p>Pastikan Anda di <strong>tempat aman</strong>.</p>
+      </header>
+
+      <!-- Indikator kemajuan -->
+      <div class="progress-steps" id="reportProgress" aria-label="Kemajuan pengisian formulir">
+        <div class="progress-step" data-step="photo"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Foto</span></div>
+        <div class="progress-step" data-step="desc"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Keterangan</span></div>
+        <div class="progress-step" data-step="loc"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Lokasi</span></div>
+      </div>
+
+      <div id="aiStatusBanner" class="alert alert-info"><span>Memeriksa status pemeriksa foto AI&hellip;</span></div>
+      <div id="formAlert" class="alert alert-error hidden" role="alert"></div>
+
+      <!-- KARTU SUKSES -->
+      <section id="reportSuccessCard" class="card hidden report-success-card" aria-live="polite">
+        <div class="success-header">
+          <div class="success-icon"><i data-icon="check" class="ic-xl"></i></div>
+                    <h2>Laporan terkirim!</h2>
+          <p>Simpan kode ini untuk cek status.</p>
+        </div>
+
+        <div class="code-display">
+          <div class="detail-label">Kode pelacakan Anda</div>
+          <div id="createdTrackingCode" class="tracking-code">-</div>
+          <button type="button" class="btn btn-secondary btn-sm" data-copy-from="createdTrackingCode"><i data-icon="copy"></i> Salin kode</button>
+        </div>
+
+        <div class="grid-4 report-success-details">
+          <div>
+            <div class="detail-label">ID laporan</div>
+            <div id="createdReportId" class="detail-value">-</div>
+          </div>
+          <div>
+            <div class="detail-label">Waktu kirim</div>
+            <div id="createdTime" class="detail-value">-</div>
+          </div>
+          <div style="grid-column: span 2">
+            <div class="detail-label">Status</div>
+            <div id="createdStatusBadge" class="detail-value">-</div>
+          </div>
+        </div>
+
+        <div class="success-detection-summary">
+          <strong>Hasil AI:</strong>
+          <span id="createdDetectionSummary">-</span>
+        </div>
+
+        <div class="success-actions">
+          <a id="btnTrackCreatedReport" href="/tracking.html" class="btn btn-primary btn-lg"><i data-icon="search"></i> Lacak laporan ini</a>
+          <button type="button" id="btnNewReport" class="btn btn-secondary btn-lg"><i data-icon="plus"></i> Buat laporan baru</button>
+        </div>
+      </section>
+
+      <!-- FORMULIR -->
+      <form id="reportForm" class="report-layout" novalidate>
+        <div class="col-left grid">
+          <!-- 1. FOTO -->
+          <section class="card form-section" id="sectionPhoto">
+            <div class="form-section-heading">
+              <span class="form-step">1</span>
+              <div>
+                <h2>Foto <span class="required">*</span></h2>
+              </div>
+            </div>
+
+            <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" class="hidden" />
+
+            <div id="uploadDropzone" class="upload-zone" role="button" tabindex="0">
+              <span class="icon-tile"><i data-icon="image" class="ic-lg"></i></span>
+              <div class="upload-zone-title">Pilih foto kejadian</div>
+              <div class="upload-zone-description">JPG / PNG, maks. 10 MB</div>
+            </div>
+
+            <div class="upload-actions">
+              <button type="button" id="btnOpenCamera" class="btn btn-dark"><i data-icon="camera"></i> Ambil foto dengan kamera</button>
+              <button type="button" id="btnPreviewAi" class="btn btn-outline-orange"><i data-icon="sparkles"></i> Cek foto dengan AI</button>
+            </div>
+
+            <details id="aiModelGroup" class="tech-details ai-model-group hidden">
+              <summary>Pengaturan pemeriksa foto (opsional)</summary>
+              <div class="form-group" style="margin:0">
+                <label for="aiModelSelect" class="form-label">Ketelitian pemeriksaan</label>
+                <select id="aiModelSelect" class="form-control"></select>
+                <div id="aiModelHint" class="form-hint"></div>
+              </div>
+            </details>
+
+            <div id="cameraContainer" class="hidden camera-container">
+              <video id="cameraVideo" autoplay playsinline muted></video>
+              <canvas id="cameraCanvas" class="hidden"></canvas>
+              <div class="camera-actions">
+                <button type="button" id="btnCapturePhoto" class="btn btn-primary"><i data-icon="camera"></i> Jepret</button>
+                <button type="button" id="btnCloseCamera" class="btn btn-ghost-light"><i data-icon="x"></i> Tutup</button>
+              </div>
+            </div>
+
+            <div id="imagePreviewWrapper" class="hidden">
+              <div class="preview-container">
+                <img id="imagePreview" src="" width="800" height="600" alt="Pratinjau foto laporan" />
+              </div>
+              <div id="selectedFileInfo" class="form-hint selected-file-info"></div>
+            </div>
+          </section>
+
+          <!-- 2. KETERANGAN -->
+          <section class="card form-section" id="sectionDesc">
+            <div class="form-section-heading">
+              <span class="form-step">2</span>
+              <div>
+                <h2>Keterangan</h2>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description" class="form-label">Apa yang terjadi? <span class="required">*</span></label>
+              <textarea id="description" class="form-control" rows="5" minlength="5" maxlength="1000" required
+                placeholder="Contoh: Asap tebal dari lahan kosong di belakang SPBU Jl. Sudirman, api mulai mendekati rumah warga."></textarea>
+              <div class="form-hint description-counter">
+                <span>Minimal 5 karakter</span>
+                <span id="descCharCount">0 / 1000 karakter</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label for="reporterName" class="form-label">Nama Anda <span class="opt">(opsional)</span></label>
+              <div class="input-icon">
+                <i data-icon="user"></i>
+                <input type="text" id="reporterName" class="form-control" maxlength="120" autocomplete="name" placeholder="Contoh: Warga Telanaipura" />
+              </div>
+              <div class="form-hint"><i data-icon="lock"></i> Hanya dilihat petugas.</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-right grid">
+          <!-- 3. LOKASI -->
+          <section class="card form-section" id="sectionLoc">
+            <div class="form-section-heading">
+              <span class="form-step">3</span>
+              <div>
+                <h2>Lokasi <span class="required">*</span></h2>
+              </div>
+            </div>
+
+            <div class="gps-actions">
+              <button type="button" id="btnGetGps" class="btn btn-primary"><i data-icon="crosshair"></i> Pakai lokasi saya</button>
+              <button type="button" id="btnSetJambiCenter" class="btn btn-secondary"><i data-icon="target"></i> Pusat Kota Jambi</button>
+            </div>
+
+            <div id="gpsStatusMsg" class="gps-status-message">Pakai GPS atau ketuk peta.</div>
+
+            <div id="reportPickerMap" class="map-box report-picker-map"></div>
+
+            <div class="grid-2 coordinate-grid">
+              <div class="form-group">
+                <label for="latitude" class="form-label">Latitude</label>
+                <input type="number" step="any" id="latitude" class="form-control" required inputmode="decimal" placeholder="-1.6101" />
+              </div>
+              <div class="form-group">
+                <label for="longitude" class="form-label">Longitude</label>
+                <input type="number" step="any" id="longitude" class="form-control" required inputmode="decimal" placeholder="103.6131" />
+              </div>
+            </div>
+          </section>
+
+          <!-- KIRIM -->
+          <div class="submit-panel">
+            <div class="card" style="padding:1rem">
+              <button type="submit" id="btnSubmitReport" class="btn btn-primary btn-lg submit-report-button"><i data-icon="send"></i> Kirim Laporan</button>
+              <p class="form-hint text-center" style="margin-top:.6rem">Foto dicek AI otomatis.</p>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- HASIL PEMERIKSAAN AI -->
+      <section id="detectionResultSection" class="card hidden detection-result-section" aria-live="polite">
+        <div class="detection-result-header">
+          <div>
+            <h2><i data-icon="sparkles"></i> Hasil cek AI</h2>
+          </div>
+          <div id="resStatusBadge"></div>
+        </div>
+
+
+        <div class="grid-2 detection-metrics">
+          <div class="detection-metric-card">
+            <div class="detail-label">Keyakinan AI</div>
+            <div id="resConfidenceVal" class="metric-value metric-red">0.0%</div>
+          </div>
+          <div class="detection-metric-card">
+            <div class="detail-label">Waktu cek</div>
+            <div id="resInferenceTime" class="metric-value">0.0 ms</div>
+          </div>
+        </div>
+        <p id="resModelInfo" class="form-hint res-model-info"></p>
+
+        <div class="grid-2 detection-images">
+          <div>
+            <h3 class="img-h">Foto asli</h3>
+            <div class="preview-container"><img id="resOriginalImg" src="" width="800" height="600" alt="Foto asli yang diunggah" /></div>
+          </div>
+          <div>
+            <h3 class="img-h">Tanda dari AI</h3>
+            <div class="preview-container"><img id="resAnnotatedImg" src="" width="800" height="600" alt="Foto dengan kotak penanda hasil deteksi AI" /></div>
+          </div>
+        </div>
+
+        <details class="tech-details">
+          <summary>Rincian teknis</summary>
+        <div class="table-responsive table-cards">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Objek</th>
+                <th>Keyakinan</th>
+                <th>Posisi kotak [x1, y1, x2, y2]</th>
+              </tr>
+            </thead>
+            <tbody id="resBboxTableBody"></tbody>
+          </table>
+        </div>
+        </details>
+
+        <p class="fine-print detection-disclaimer">Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/map.js?v=20261113k"></script>
+  <script src="/assets/js/report.js?v=20261113g"></script>
+  <script src="/assets/js/report-ui.js?v=20261112q"></script>
+</body>
+</html>

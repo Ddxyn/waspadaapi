@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="description" content="Laporkan dugaan kebakaran di Kota Jambi dengan foto dan titik lokasi. AI memeriksa tanda api dan asap, petugas memverifikasi laporan Anda." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ApiWaspada" />
+  <meta property="og:title" content="ApiWaspada | Lapor Kebakaran Kota Jambi" />
+  <meta property="og:description" content="Laporkan dugaan kebakaran di Kota Jambi dengan foto dan titik lokasi. AI memeriksa tanda api dan asap, petugas memverifikasi laporan Anda." />
+  <meta property="og:image" content="/assets/images/og-apiwaspada.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>ApiWaspada | Lapor Kebakaran Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="public" data-page="home">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1">
+    <section class="hero-titik" aria-labelledby="heroTitle">
+      <div class="container hero-titik__grid">
+        <div>
+          <p class="hero-titik__place"><i data-icon="pin"></i> Kota Jambi, Provinsi Jambi</p>
+          <h1 id="heroTitle">Lihat api atau asap<span class="tb">?</span> <span>Kirim titiknya<span class="tb">.</span></span></h1>
+          <p class="lead">Foto dan lokasi sudah cukup. AI memeriksa tanda api dan asap di foto Anda, lalu petugas Kota Jambi memverifikasi dan menindaklanjuti.</p>
+          <div class="hero-titik__actions">
+            <a href="/report.html" class="btn btn-primary btn-lg"><i data-icon="flame"></i> Laporkan titik api</a>
+            <a href="/tracking.html" class="arrow-link">Lacak laporan saya <i data-icon="arrow-right"></i></a>
+          </div>
+          <ul class="sys-status" aria-live="polite">
+            <li><span class="status-dot" id="homeSystemDot"></span>Layanan <b id="homeSystemStatus">memeriksa&hellip;</b></li>
+            <li><span class="status-dot" id="homeAiDot"></span>Pemeriksa foto AI <b id="homeAiStatus">memeriksa&hellip;</b></li>
+          </ul>
+        </div>
+
+        <figure class="hero-titik__map">
+          <div class="map-stage">
+            <div id="landingMap" class="map-box" role="region" aria-label="Peta titik laporan kebakaran Kota Jambi"></div>
+            <div class="map-total" aria-live="polite"><span class="status-dot ok" id="homeLiveDot"></span> <strong id="homeMapCount">&ndash;</strong> titik laporan di peta</div>
+          </div>
+          <figcaption class="map-cap">
+            <span class="coord" title="Koordinat pusat pantau Kota Jambi">Pusat pantau &nbsp;-1.6101, 103.6131</span>
+            <span class="count-chips">
+              <span class="count-chip pending"><strong id="heroCountPending">0</strong> menunggu</span>
+              <span class="count-chip verified"><strong id="heroCountActive">0</strong> ditangani</span>
+              <span class="count-chip completed"><strong id="heroCountDone">0</strong> selesai</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="band-darurat" aria-labelledby="daruratTitle">
+      <div class="container">
+        <div>
+          <h2 id="daruratTitle">Ada orang terjebak atau api sudah besar?</h2>
+          <p>Telepon dulu. Kirim laporan di sini setelah Anda berada di tempat aman.</p>
+        </div>
+        <ul class="calls">
+          <li><a href="tel:113" class="call"><strong>113</strong><span>Pemadam kebakaran</span></a></li>
+          <li><a href="tel:112" class="call"><strong>112</strong><span>Darurat umum</span></a></li>
+          <li><a href="tel:110" class="call"><strong>110</strong><span>Polisi</span></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="alurTitle">
+      <div class="container">
+        <div class="alur-head">
+          <h2 class="section-title" id="alurTitle">Dari foto ke petugas, kira-kira satu menit</h2>
+          <p>Anda tidak perlu membuat akun. Nama pelapor hanya dilihat petugas.</p>
+        </div>
+        <ol class="alur">
+          <li><h3>Foto kejadian</h3><p>Ambil dari jarak aman, atau pilih dari galeri HP.</p></li>
+          <li><h3>Tandai titiknya</h3><p>Pakai GPS HP, atau ketuk lokasi di peta Kota Jambi.</p></li>
+          <li><h3>AI memeriksa foto</h3><p>Sistem mencari tanda api dan asap sebagai penilaian awal.</p></li>
+          <li><h3>Petugas menindaklanjuti</h3><p>Simpan kode laporan untuk memantau status verifikasi.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0" aria-labelledby="menuTitle">
+      <div class="container">
+        <h2 class="sr-only" id="menuTitle">Menu lainnya</h2>
+        <ul class="indeks">
+          <li><a href="/tracking.html"><strong>Lacak laporan</strong><span>Masukkan kode AW-... untuk melihat statusnya.</span><i data-icon="arrow-right"></i></a></li>
+          <li><a href="/peta.html"><strong>Peta laporan</strong><span>Semua titik laporan warga dan statusnya.</span><i data-icon="arrow-right"></i></a></li>
+          <li><a href="/panduan.html"><strong>Panduan dan tanya jawab</strong><span>Cara memotret dengan aman dan arti setiap status.</span><i data-icon="arrow-right"></i></a></li>
+        </ul>
+        <div class="disclaimer-box" style="margin-top:1.75rem">
+          <i data-icon="info"></i>
+          <span>Hasil AI adalah <strong>indikasi awal</strong> dari foto, bukan konfirmasi resmi. Setiap laporan tetap diperiksa petugas. ApiWaspada adalah prototype dan <strong>tidak menggantikan</strong> layanan darurat resmi.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/map.js?v=20261113k"></script>
+  <script src="/assets/js/home.js?v=20261113h"></script>
+</body>
+</html>

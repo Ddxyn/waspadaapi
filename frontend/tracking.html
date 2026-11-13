@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="description" content="Masukkan kode laporan AW untuk melihat status verifikasi dan tindak lanjut petugas atas laporan kebakaran Anda di Kota Jambi." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ApiWaspada" />
+  <meta property="og:title" content="Lacak Laporan | ApiWaspada Kota Jambi" />
+  <meta property="og:description" content="Masukkan kode laporan AW untuk melihat status verifikasi dan tindak lanjut petugas atas laporan kebakaran Anda di Kota Jambi." />
+  <meta property="og:image" content="/assets/images/og-apiwaspada.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>Lacak Laporan | ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="public" data-page="tracking">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1">
+    <div class="container container-narrow">
+      <header class="page-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/beranda.html">Beranda</a><i data-icon="chevron-right"></i><span>Lacak Laporan</span></nav>
+        <h1>Lacak laporan Anda</h1>
+        <p>Masukkan kode laporan Anda.</p>
+      </header>
+
+      <div class="search-card">
+        <form id="trackingSearchForm" class="search-row" role="search">
+          <label for="trackingInput" class="sr-only">Kode pelacakan atau ID laporan</label>
+          <div class="input-icon" style="flex:1">
+            <i data-icon="search"></i>
+            <input type="text" id="trackingInput" class="form-control" autocomplete="off" autocapitalize="characters" spellcheck="false"
+              placeholder="AW-20261111-XXXXXX" required />
+          </div>
+          <button type="submit" id="btnTrackSearch" class="btn btn-primary btn-lg">Cek Status</button>
+        </form>
+        <div id="recentCodes" class="recent-codes hidden"></div>
+        <div id="trackingAlert" class="alert alert-error hidden" role="alert" style="margin:1rem 0 0"></div>
+      </div>
+
+      <!-- HASIL -->
+      <section id="trackingResultBox" class="card hidden" style="margin-top:1.25rem" aria-live="polite">
+        <div class="result-head">
+          <div>
+            <div class="detail-label">Laporan <span id="trkId"></span></div>
+            <h2 class="code" id="trkCode"></h2>
+          </div>
+          <div id="trkStatusBadge"></div>
+        </div>
+
+        <div class="status-tracker" id="trkTracker">
+          <span class="fill" id="trkTrackerFill"></span>
+          <div class="tracker-step" data-s="pending"><span class="node"><i data-icon="send"></i></span><strong>Diterima</strong></div>
+          <div class="tracker-step" data-s="verified"><span class="node"><i data-icon="shield"></i></span><strong>Diverifikasi</strong></div>
+          <div class="tracker-step" data-s="completed"><span class="node"><i data-icon="check"></i></span><strong>Selesai</strong></div>
+        </div>
+        <div id="trkStatusExplain" class="status-explain pending"></div>
+
+        <div class="info-tiles">
+          <div class="info-tile">
+            <div class="detail-label"><i data-icon="clock"></i> Dilaporkan</div>
+            <div id="trkCreatedAt" class="detail-value">-</div>
+          </div>
+          <div class="info-tile hidden">
+            <div class="detail-label"><i data-icon="refresh"></i> Diperbarui</div>
+            <div id="trkUpdatedAt" class="detail-value">-</div>
+          </div>
+          <div class="info-tile">
+            <div class="detail-label"><i data-icon="sparkles"></i> Hasil AI</div>
+            <div id="trkDetectionBadge" class="detail-value">-</div>
+          </div>
+          <div class="info-tile hidden">
+            <div class="detail-label"><i data-icon="target"></i> Keyakinan AI</div>
+            <div id="trkConfidence" class="detail-value">-</div>
+          </div>
+        </div>
+
+        <div class="desc-box">
+          <div class="detail-label">Keterangan</div>
+          <p id="trkDescription"></p>
+        </div>
+
+        <div class="img-label"><i data-icon="pin"></i> Lokasi <code id="trkCoords" class="hidden">-</code></div>
+        <div id="trkMap" class="map-box mini-map"></div>
+
+        <div class="grid-2" style="margin-bottom:1.25rem">
+          <div>
+            <div class="img-label"><i data-icon="image"></i> Foto asli</div>
+            <div class="preview-container"><img id="trkOrigImg" src="" width="800" height="600" alt="Foto asli laporan" loading="lazy" /></div>
+          </div>
+          <div>
+            <div class="img-label"><i data-icon="sparkles"></i> Tanda dari AI</div>
+            <div class="preview-container"><img id="trkResultImg" src="" width="800" height="600" alt="Foto dengan penanda hasil deteksi AI" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <p class="fine-print" style="margin:-.5rem 0 1.25rem;justify-content:flex-start"><i data-icon="refresh"></i> Status diperbarui otomatis setiap 30 detik.</p>
+
+        <h3 class="card-title" style="margin-bottom:.9rem"><i data-icon="flame"></i> Penanganan Tim Damkar</h3>
+        <div id="trkProgress" class="timeline" style="margin-bottom:1.25rem"></div>
+
+        <h3 class="card-title" style="margin-bottom:.9rem"><i data-icon="list"></i> Riwayat</h3>
+        <div id="trkHistoryList" class="timeline" style="margin-bottom:1.25rem"></div>
+
+        <p class="fine-print"><i data-icon="info"></i> Hasil AI hanya perkiraan awal. Keputusan akhir oleh petugas.</p>
+      </section>
+
+      <!-- KOSONG / BANTUAN -->
+      <section id="trackingHelp" class="grid" style="margin-top:1.25rem">
+        <div class="card">
+          <h3 class="card-title"><i data-icon="help"></i> Lupa kode?</h3>
+          <p class="card-sub" style="margin-top:.5rem">Cari laporan Anda di <a href="/peta.html">Peta Laporan</a>.</p>
+        </div>
+        <a href="/report.html" class="quick-link">
+          <span class="icon-tile"><i data-icon="flame" class="ic-lg"></i></span>
+          <span><strong>Belum melapor?</strong><span>Lapor sekarang</span></span>
+          <i data-icon="chevron-right" class="arrow"></i>
+        </a>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/map.js?v=20261113k"></script>
+  <script src="/assets/js/progress-ui.js?v=20261113k"></script>
+  <script src="/assets/js/tracking.js?v=20261113k"></script>
+</body>
+</html>

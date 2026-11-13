@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="robots" content="noindex" />
+  <title>Masuk Petugas | ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="public" data-page="login">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1" class="auth-wrap">
+    <aside class="auth-side">
+      <span class="hero-badge" style="align-self:flex-start"><span class="pin"><i data-icon="lock"></i></span>Akses khusus petugas</span>
+      <h2>Portal Verifikasi Laporan Kebakaran</h2>
+      <p>Periksa laporan warga, bandingkan dengan hasil AI, dan perbarui status penanganan dalam satu tempat.</p>
+      <ul>
+        <li><i data-icon="grid"></i> Ringkasan &amp; grafik laporan</li>
+        <li><i data-icon="map"></i> Peta sebaran titik kejadian</li>
+        <li><i data-icon="shield"></i> Verifikasi &amp; riwayat status</li>
+      </ul>
+    </aside>
+
+    <div class="auth-main">
+      <div class="auth-card">
+        <div class="icon-tile dark"><i data-icon="shield" class="ic-lg"></i></div>
+        <h1>Masuk sebagai petugas</h1>
+        <p class="text-muted" style="margin:.35rem 0 1.5rem">Gunakan akun petugas yang telah terdaftar.</p>
+
+        <div id="loginAlert" class="alert alert-error hidden" role="alert"></div>
+
+        <form id="officerLoginForm" novalidate>
+          <div class="form-group">
+            <label for="usernameInput" class="form-label">Username</label>
+            <div class="input-icon">
+              <i data-icon="user"></i>
+              <input type="text" id="usernameInput" class="form-control" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Username petugas" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="passwordInput" class="form-label">Password</label>
+            <div class="input-icon password-wrap">
+              <i data-icon="lock"></i>
+              <input type="password" id="passwordInput" class="form-control" required autocomplete="current-password" placeholder="Password" />
+              <button type="button" class="password-toggle" id="btnTogglePassword" aria-label="Tampilkan password"><i data-icon="eye"></i></button>
+            </div>
+          </div>
+
+          <button type="submit" id="btnLoginSubmit" class="btn btn-dark btn-lg btn-block" style="margin-top:.5rem">Masuk <i data-icon="arrow-right"></i></button>
+        </form>
+
+        <details class="dev-note">
+          <summary>Catatan pengembangan (prototype lokal)</summary>
+          <div>Akun petugas diatur melalui file <code>.env</code> dan diinisialisasi oleh <code>scripts/init_admin.py</code> (username bawaan: <code>petugas_jambi</code>).</div>
+        </details>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/auth.js?v=20261113k"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("btnTogglePassword");
+      var input = document.getElementById("passwordInput");
+      if (!btn || !input) return;
+      btn.addEventListener("click", function () {
+        var show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.setAttribute("aria-label", show ? "Sembunyikan password" : "Tampilkan password");
+        btn.innerHTML = window.AWLayout.icon(show ? "eye-off" : "eye");
+      });
+    });
+  </script>
+</body>
+</html>
